@@ -9,7 +9,7 @@ import {
 const TEAM = {
   shain:    { name: "Shain Mukungu",        short: "SM",  role: "Project & Technical Lead — LMS, systems, coordination", color: "#6366f1" },
   tumisang: { name: "Tumisang Kedidimetse", short: "TK",  role: "Head of Academics — curriculum & lessons",             color: "#10b981" },
-  chipo: { name: "Chipo Mazhani",  short: "BM",  role: "Data, Operations, Logistics & Finance (3rd party)",    color: "#0ea5e9" },
+  baboloki: { name: "Baboloki C. Mazhani",  short: "BM",  role: "Data, Operations, Logistics & Finance (3rd party)",    color: "#0ea5e9" },
   calvin:   { name: "Calvin Dichaba",       short: "CD",  role: "Marketing, Branding & Design",                         color: "#a855f7" },
   all:      { name: "Whole team",           short: "ALL", role: "Everyone",                                              color: "#64748b" },
 };
@@ -105,8 +105,6 @@ const clone = (x) => JSON.parse(JSON.stringify(x));
 export default function Dashboard() {
   const [board, setBoard] = useState(null);
   const [synced, setSynced] = useState(true);
-  const [lastSynced, setLastSynced] = useState(null);
-  const [polling, setPolling] = useState(false);
   const [ownerFilter, setOwnerFilter] = useState("all");
   const [showDone, setShowDone] = useState(true);
   const [collapsed, setCollapsed] = useState({ p0: true });
@@ -143,35 +141,12 @@ export default function Dashboard() {
     // eslint-disable-next-line
   }, []);
 
-  // ----- poll for remote changes every 30s -----
-  const fetchRemote = async (silent = false) => {
-    if (!silent) setPolling(true);
-    try {
-      if (typeof window !== "undefined" && window.storage) {
-        const r = await window.storage.get(STORAGE_KEY, true);
-        if (r && r.value) {
-          setBoard(JSON.parse(r.value));
-          setSynced(true);
-          setLastSynced(new Date());
-        }
-      }
-    } catch (e) { setSynced(false); }
-    if (!silent) setPolling(false);
-  };
-
-  useEffect(() => {
-    const id = setInterval(() => fetchRemote(true), 30000);
-    return () => clearInterval(id);
-    // eslint-disable-next-line
-  }, []);
-
   const persist = async (next, silent) => {
     if (!silent) setBoard(next);
     try {
       if (typeof window !== "undefined" && window.storage) {
         await window.storage.set(STORAGE_KEY, JSON.stringify(next), true);
         setSynced(true);
-        setLastSynced(new Date());
       }
     } catch (e) { setSynced(false); }
   };
@@ -454,16 +429,8 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="flex items-center justify-center gap-3 mt-5 text-[11px] text-slate-400 flex-wrap">
-          <span className="inline-flex items-center gap-1.5">
-            <span className="rounded-full" style={{ width: 6, height: 6, background: synced ? "#10b981" : "#f43f5e" }} />
-            {synced ? "Synced with team" : "Sync unavailable"}
-          </span>
-          {lastSynced && <span>· last updated {lastSynced.toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})}</span>}
-          <span>·</span>
-          <button onClick={() => fetchRemote(false)} disabled={polling} className="inline-flex items-center gap-1 hover:text-slate-600 disabled:opacity-40">
-            <RotateCcw size={11} className={polling ? "animate-spin" : ""} /> {polling ? "Syncing…" : "Sync now"}
-          </button>
+        <div className="flex items-center justify-center gap-3 mt-5 text-[11px] text-slate-400">
+          <span className="inline-flex items-center gap-1.5"><span className="rounded-full" style={{ width: 6, height: 6, background: synced ? "#10b981" : "#f43f5e" }} />{synced ? "Saved for the whole team" : "Saved locally — sync unavailable"}</span>
           <span>·</span>
           <button onClick={resetBoard} className="inline-flex items-center gap-1 hover:text-slate-600"><RotateCcw size={11} /> Reset to template</button>
         </div>
