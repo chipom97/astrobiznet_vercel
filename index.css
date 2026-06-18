@@ -1,1 +1,67 @@
 @import "tailwindcss";
+
+/* ---- input helper ---- */
+.fi { width:100%; padding:7px 10px; border-radius:7px; border:.5px solid #e2e8f0; background:#f8fafc; color:#0f172a; font-size:13px; font-family:inherit; }
+.fi:focus { outline:none; border-color:#4f46e5; }
+
+/* ---- page background ---- */
+html { background:#f1f5f9; }
+.app-root { background:#f1f5f9; }
+
+/* ============ DARK MODE ============ */
+html.dark, .dark body { background:#0b1020; }
+.dark .app-root { background:#0b1020; }
+
+/* surfaces */
+.dark .bg-white { background:#161e2f; }
+.dark .bg-slate-50 { background:#1b2436; }
+.dark .bg-slate-100 { background:#283248; }
+.dark .bg-slate-200 { background:#283248; }
+.dark .bg-rose-50 { background:#2a1620; }
+.dark .bg-indigo-50\/60 { background:rgba(99,102,241,.16); }
+.dark .bg-slate-900 { background:#4f46e5; }
+
+/* hover surfaces */
+.dark .hover\:bg-white:hover { background:#1f2942; }
+.dark .hover\:bg-slate-50:hover { background:#1f2942; }
+.dark .hover\:bg-slate-100:hover { background:#2c3550; }
+.dark .hover\:bg-rose-50:hover { background:#2a1620; }
+
+/* text ramp (inverted) */
+.dark .text-slate-900 { color:#e7ecf5; }
+.dark .text-slate-800 { color:#dde4f0; }
+.dark .text-slate-700 { color:#c8d1e3; }
+.dark .text-slate-600 { color:#aeb8cc; }
+.dark .text-slate-500 { color:#909bb1; }
+.dark .text-slate-400 { color:#717c92; }
+.dark .text-slate-300 { color:#58607a; }
+
+/* accent text */
+.dark .text-indigo-600 { color:#a5b4fc; }
+.dark .text-indigo-500 { color:#a5b4fc; }
+.dark .text-rose-600 { color:#fb7185; }
+.dark .text-rose-500 { color:#fb7185; }
+.dark .text-emerald-600 { color:#34d399; }
+.dark .text-amber-600 { color:#fbbf24; }
+.dark .text-amber-500 { color:#fbbf24; }
+.dark .text-teal-600 { color:#2dd4bf; }
+
+/* hover text */
+.dark .hover\:text-indigo-600:hover { color:#c7d2fe; }
+.dark .hover\:text-rose-600:hover { color:#fda4af; }
+.dark .hover\:text-slate-400:hover { color:#717c92; }
+.dark .hover\:text-slate-600:hover { color:#aeb8cc; }
+.dark .hover\:text-slate-700:hover { color:#c8d1e3; }
+
+/* borders */
+.dark .border-slate-200 { border-color:#2b3550; }
+.dark .border-slate-100 { border-color:#222c42; }
+.dark .border-slate-300 { border-color:#384156; }
+.dark .border-slate-900 { border-color:#4f46e5; }
+.dark .hover\:border-indigo-300:hover { border-color:#4f46e5; }
+.dark .hover\:border-indigo-400:hover { border-color:#6366f1; }
+.dark .hover\:border-rose-300:hover { border-color:#9f1239; }
+
+/* inputs in dark */
+.dark .fi { background:#1b2436; border-color:#2b3550; color:#e7ecf5; }
+.dark .fi:focus { border-color:#6366f1; }
