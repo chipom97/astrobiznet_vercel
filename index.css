@@ -7,6 +7,8 @@
 /* ---- page background ---- */
 html { background:#f1f5f9; }
 .app-root { background:#f1f5f9; }
+:root { --ring-track:#e6eaf1; }
+.dark { --ring-track:#2b3550; }
 
 /* ============ DARK MODE ============ */
 html.dark, .dark body { background:#0b1020; }
