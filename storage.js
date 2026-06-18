@@ -1,27 +1,23 @@
-// AstroBizNet — shared sync via Supabase
-// All four teammates see the same board. No accounts needed to view.
+// AstroBizNet — Supabase storage + realtime sync
+// Everyone shares one board. Changes broadcast live to all open screens.
+
+import { createClient } from "@supabase/supabase-js";
 
 const SUPABASE_URL = "https://vdjdkrqwaqawmsxhshok.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_1ZctFvAii716LzmmX-bnZQ_hX1LqY09";
 
-const headers = {
-  "Content-Type": "application/json",
-  "apikey": SUPABASE_ANON_KEY,
-  "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
-  "Prefer": "resolution=merge-duplicates",
-};
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const supabaseImpl = {
+const impl = {
   async get(key) {
     try {
-      const res = await fetch(
-        `${SUPABASE_URL}/rest/v1/board?id=eq.${encodeURIComponent(key)}&select=data&limit=1`,
-        { headers }
-      );
-      if (!res.ok) return null;
-      const rows = await res.json();
-      if (!rows || rows.length === 0) return null;
-      return { key, value: JSON.stringify(rows[0].data), shared: true };
+      const { data, error } = await supabase
+        .from("board")
+        .select("data")
+        .eq("id", key)
+        .maybeSingle();
+      if (error || !data) return null;
+      return { key, value: JSON.stringify(data.data), shared: true };
     } catch (e) {
       return null;
     }
@@ -30,12 +26,8 @@ const supabaseImpl = {
   async set(key, value) {
     try {
       const parsed = JSON.parse(value);
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/board`, {
-        method: "POST",
-        headers,
-        body: JSON.stringify({ id: key, data: parsed }),
-      });
-      if (!res.ok) return null;
+      const { error } = await supabase.from("board").upsert({ id: key, data: parsed });
+      if (error) return null;
       return { key, value, shared: true };
     } catch (e) {
       return null;
@@ -44,10 +36,7 @@ const supabaseImpl = {
 
   async delete(key) {
     try {
-      await fetch(
-        `${SUPABASE_URL}/rest/v1/board?id=eq.${encodeURIComponent(key)}`,
-        { method: "DELETE", headers }
-      );
+      await supabase.from("board").delete().eq("id", key);
       return { key, deleted: true, shared: true };
     } catch (e) {
       return null;
@@ -57,10 +46,32 @@ const supabaseImpl = {
   async list() {
     return { keys: [], shared: true };
   },
+
+  // Live updates: calls cb(jsonString) whenever this key changes in the DB.
+  // Returns an unsubscribe function.
+  subscribe(key, cb) {
+    try {
+      const channel = supabase
+        .channel("board_" + key)
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "board", filter: `id=eq.${key}` },
+          (payload) => {
+            if (payload.new && payload.new.data) {
+              cb(JSON.stringify(payload.new.data));
+            }
+          }
+        )
+        .subscribe();
+      return () => supabase.removeChannel(channel);
+    } catch (e) {
+      return () => {};
+    }
+  },
 };
 
 if (typeof window !== "undefined" && !window.storage) {
-  window.storage = supabaseImpl;
+  window.storage = impl;
 }
 
-export default supabaseImpl;
+export default impl;
