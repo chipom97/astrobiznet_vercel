@@ -552,7 +552,7 @@ export default function Dashboard() {
             <button key={p.id} onClick={() => { setTab("tasks"); setOpenPhaseId(p.id); }} className="bg-white rounded-2xl border border-slate-200 hover:border-indigo-400 hover:-translate-y-0.5 transition-all p-5 flex items-center gap-4 text-left">
               <Ring pct={pct} color={p.accent} size={70} />
               <div className="min-w-0">
-                <div className="text-[15px] font-bold text-slate-800 leading-tight">{p.label}</div>
+                <div className="text-[15px] font-bold text-slate-800 leading-tight break-words" style={{ overflowWrap: "anywhere" }}>{p.label}</div>
                 <div className="text-[11px] uppercase tracking-wider text-slate-400 mt-1">{p.month}</div>
                 <div className="text-[13px] text-slate-500 mt-1.5 font-medium">{dc}/{tc} tasks</div>
               </div>
@@ -610,7 +610,7 @@ export default function Dashboard() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start gap-2">
                     <div className="flex-1 min-w-0">
-                      <div className="text-[15px] font-bold text-slate-800 leading-tight break-words">{p.label}</div>
+                      <div className="text-[17px] font-bold text-slate-800 leading-tight break-words" style={{ overflowWrap: "anywhere" }}>{p.label}</div>
                       <div className="text-[11px] uppercase tracking-wider text-slate-400 mt-1">{p.month}</div>
                     </div>
                     <span onClick={(e) => { e.stopPropagation(); openEditPhase(p); }} className="p-1.5 rounded-md text-slate-300 hover:text-indigo-600 hover:bg-slate-50 opacity-0 group-hover:opacity-100"><Pencil size={15} /></span>
