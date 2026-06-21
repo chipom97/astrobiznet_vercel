@@ -22,15 +22,18 @@ const PROJECT_END = "2026-12-31";
 // ---------- Seed data ----------
 const SEED_PHASES = [
   { id: "p1", label: "Planning & setup", month: "June", accent: "#6366f1", tasks: [
-    { id: "p1-10", title: "Schedule first internal team planning meeting", owner: ["shain"], due: "2026-06-18" },
-    { id: "p1-2",  title: "Set up team comms + shared workspace (WhatsApp / Drive)", owner: ["baboloki"], due: "2026-06-19" },
+    { id: "p1-10", title: "Schedule & hold first internal team planning meeting", owner: ["shain"], due: "2026-06-18", done: true },
+    { id: "p1-2",  title: "Set up team comms + shared Google Drive workspace", owner: ["baboloki"], due: "2026-06-19", done: true, note: "Shared Drive: https://drive.google.com/drive/folders/1DETnqZvMxUOXponQgxrKyjOp_Hns-4ht" },
     { id: "p1-1",  title: "Decide & register the domain (pick ONE)", owner: ["shain"], due: "2026-06-20" },
+    { id: "p1-11", title: "Create the standard lesson-plan template + share Drive with team", owner: ["shain"], due: "2026-06-23", note: "Template captures, per lesson: what it covers · learning objectives & outcomes · key topics/concepts · activities & quiz questions. Plans (outlines), not full lessons yet." },
     { id: "p1-3",  title: "Confirm grant received; open financial tracking sheet", owner: ["baboloki"], due: "2026-06-25" },
+    { id: "p1-12", title: "Draft the 8 BUSINESS lesson plans (outline · objectives · topics · quiz activities)", owner: ["baboloki"], due: "2026-06-26", note: "Lesson plans / course outlines only — not the full lessons yet. Share in the Drive." },
+    { id: "p1-13", title: "Draft the 8 ACADEMIC lesson plans (outline · objectives · topics · quiz activities)", owner: ["tumisang"], due: "2026-06-26", note: "Lesson plans / course outlines only — not the full lessons yet. Share in the Drive." },
+    { id: "p1-5",  title: "Branding: logo, colours & templates", owner: ["calvin"], due: "2026-06-26" },
+    { id: "p1-7",  title: "Social media & recruitment strategy + content / posts plan", owner: ["calvin"], due: "2026-06-26", note: "How we attract participants to the cohort." },
+    { id: "p1-6",  title: "Design LMS & competition site (plan to hand over to developers)", owner: ["shain"], due: "2026-06-26" },
     { id: "p1-9",  title: "Agree baseline evaluation timing with OAD; request survey", owner: ["shain","baboloki"], due: "2026-06-26" },
-    { id: "p1-4",  title: "Finalise 16-lesson curriculum outline & weekly flow", owner: ["tumisang"], due: "2026-06-28" },
-    { id: "p1-5",  title: "Design brand identity (logo, colours, templates)", owner: ["calvin"], due: "2026-06-28" },
-    { id: "p1-6",  title: "Design LMS competition structure (dashboards, quizzes, scoring)", owner: ["shain"], due: "2026-06-30" },
-    { id: "p1-7",  title: "Draft communications & social media plan + content calendar", owner: ["calvin"], due: "2026-06-30" },
+    { id: "p1-4",  title: "Weekend review: consolidate all 16 lesson plans into a unified curriculum", owner: ["all"], due: "2026-06-28", note: "Review submissions, align work, consolidate into one plan." },
     { id: "p1-8",  title: "Define weekly assessment & participant filtering plan", owner: ["tumisang","shain"], due: "2026-06-30" },
   ]},
   { id: "p2", label: "Build & recruit", month: "July", accent: "#0ea5e9", tasks: [
@@ -78,7 +81,8 @@ const SEED_PHASES = [
 
 const SEED_EVENTS = [
   { id: "ev-onboard",  label: "OAD virtual onboarding",         date: "2026-06-12", type: "meeting",   done: true },
-  { id: "ev-meet1",    label: "First internal team meeting",    date: "2026-06-18", type: "meeting",   tbd: true },
+  { id: "ev-meet1",    label: "First internal team meeting",    date: "2026-06-18", type: "meeting",   done: true },
+  { id: "ev-review",   label: "Weekend review (lesson plans + alignment)", date: "2026-06-28", type: "meeting", tbd: true },
   { id: "ev-recruit",  label: "Recruitment launch",             date: "2026-07-15", type: "milestone" },
   { id: "ev-cohort",   label: "Cohort starts (baseline first)", date: "2026-08-03", type: "milestone" },
   { id: "ev-final",    label: "Final pitch competition",        date: "2026-10-20", endDate: "2026-10-22", type: "milestone" },
@@ -87,7 +91,7 @@ const SEED_EVENTS = [
 
 const SEED_MILESTONES = [
   { id: "m1", title: "OAD virtual onboarding",            date: "2026-06-12", desc: "Completed", state: "done" },
-  { id: "m2", title: "First internal team meeting",       date: "2026-06-18", desc: "Confirm exact date with team", state: "now" },
+  { id: "m2", title: "First internal team meeting",       date: "2026-06-18", desc: "Held — tasks delegated, deadline 26 June", state: "done" },
   { id: "m3", title: "Recruitment launch",                date: "2026-07-15", desc: "Target 50 applicants across Botswana & Namibia", state: "future" },
   { id: "m4", title: "Cohort starts + baseline evaluation", date: "2026-08-03", desc: "Baseline survey must run before the first lesson", state: "future" },
   { id: "m5", title: "Midline evaluation",                date: "2026-09-15", desc: "OAD survey administered during delivery", state: "future" },
@@ -104,6 +108,30 @@ const addDay = (s) => { const d = parseDate(s); d.setDate(d.getDate() + 1); retu
 const newId = () => "u" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 const sortTasks = (a) => [...a].sort((x, y) => { if (!x.due) return 1; if (!y.due) return -1; return parseDate(x.due) - parseDate(y.due); });
 const clone = (x) => JSON.parse(JSON.stringify(x));
+
+// Bump SEED_REV whenever the seed gains NEW tasks/events you want pushed live.
+// mergeSeed is ADDITIVE only: it adds any seed items missing from the live board
+// (matched by id) and never edits or deletes what's already there, so nobody's
+// tick-offs, edits or notes are lost. It runs once per rev, then records the rev.
+const SEED_REV = 3;
+const mergeSeed = (b) => {
+  if (b && b.rev === SEED_REV) return b;
+  const out = clone(b || {});
+  out.phases = out.phases || [];
+  out.events = out.events || [];
+  out.milestones = out.milestones || [];
+  out.notes = out.notes || {};
+  const find = (arr, id) => arr.find((x) => x.id === id);
+  SEED_PHASES.forEach((sp) => {
+    const ph = find(out.phases, sp.id);
+    if (!ph) { out.phases.push(clone(sp)); return; }
+    sp.tasks.forEach((st) => { if (!find(ph.tasks, st.id)) ph.tasks.push(clone(st)); });
+  });
+  SEED_EVENTS.forEach((se) => { if (!find(out.events, se.id)) out.events.push(clone(se)); });
+  SEED_MILESTONES.forEach((sm) => { if (!find(out.milestones, sm.id)) out.milestones.push(clone(sm)); });
+  out.rev = SEED_REV;
+  return out;
+};
 
 const NAV = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
@@ -127,6 +155,11 @@ export default function Dashboard() {
   const [dark, setDark] = useState(() => { try { return localStorage.getItem("abz_theme") === "dark"; } catch (e) { return false; } });
   const boardRef = useRef(board);
   boardRef.current = board;
+  // ----- live-sync guards (fix for "dashboard reloads while I'm typing") -----
+  const editingRef = useRef(false);   // true while the add/edit modal is open
+  const typingRef = useRef(0);        // timestamp of the last note keystroke
+  const pendingRef = useRef(null);    // a remote update parked until you stop typing
+  const noteDraftRef = useRef({});    // in-progress note text, survives re-renders
 
   const today = useMemo(() => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; }, []);
   const todayStr = useMemo(() => `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,"0")}-${String(today.getDate()).padStart(2,"0")}`, [today]);
@@ -145,7 +178,21 @@ export default function Dashboard() {
     events: b.events || clone(SEED_EVENTS),
     milestones: b.milestones || clone(SEED_MILESTONES),
     notes: b.notes || {},
+    rev: b.rev,
   });
+
+  // Are we mid-edit? If so, don't let a remote update overwrite the screen.
+  const isBusy = () => editingRef.current || (Date.now() - typingRef.current < 4000);
+
+  // Apply an incoming board from Supabase — but only when you're not typing,
+  // and only if it's actually different (kills the self-triggered reloads).
+  const applyRemote = (raw) => {
+    let next;
+    try { next = normalise(JSON.parse(raw)); } catch (e) { return; }
+    if (isBusy()) { pendingRef.current = raw; return; }
+    setBoard((prev) => (JSON.stringify(prev) === JSON.stringify(next) ? prev : next));
+    setSynced(true); setLastSynced(new Date());
+  };
 
   // ----- load + realtime -----
   useEffect(() => {
@@ -158,16 +205,14 @@ export default function Dashboard() {
           if (r && r.value) loaded = normalise(JSON.parse(r.value));
         }
       } catch (e) { /* none */ }
-      if (!loaded) {
-        loaded = { phases: clone(SEED_PHASES), events: clone(SEED_EVENTS), milestones: clone(SEED_MILESTONES), notes: {} };
-        persist(loaded, true);
-      }
+      if (!loaded) loaded = normalise({});           // fresh board → full seed
+      const hadRev = loaded.rev;
+      loaded = mergeSeed(loaded);                     // additively pull in any new tasks/events
       setBoard(loaded);
+      if (hadRev !== SEED_REV) persist(loaded, true); // save merged board so the team gets the new items
 
       if (window.storage && window.storage.subscribe) {
-        unsub = window.storage.subscribe(STORAGE_KEY, (val) => {
-          try { setBoard(normalise(JSON.parse(val))); setSynced(true); setLastSynced(new Date()); } catch (e) {}
-        });
+        unsub = window.storage.subscribe(STORAGE_KEY, (val) => applyRemote(val));
       }
     })();
     return () => unsub();
@@ -180,12 +225,25 @@ export default function Dashboard() {
       try {
         if (window.storage) {
           const r = await window.storage.get(STORAGE_KEY, true);
-          if (r && r.value) { setBoard(normalise(JSON.parse(r.value))); setSynced(true); }
+          if (r && r.value) applyRemote(r.value);
         }
       } catch (e) { setSynced(false); }
     }, 30000);
     return () => clearInterval(id);
   }, []);
+
+  // ----- flush any parked remote update once you've stopped typing -----
+  useEffect(() => {
+    const id = setInterval(() => {
+      if (pendingRef.current && !isBusy()) {
+        const raw = pendingRef.current; pendingRef.current = null; applyRemote(raw);
+      }
+    }, 1500);
+    return () => clearInterval(id);
+  }, []);
+
+  // ----- track whether the edit modal is open -----
+  useEffect(() => { editingRef.current = !!editing; }, [editing]);
 
   const persist = async (next, silent) => {
     if (!silent) setBoard(next);
@@ -362,7 +420,10 @@ export default function Dashboard() {
       <Circle size={18} className="text-slate-300 shrink-0" />
       <span className="flex-1 min-w-0 text-[15px] text-slate-700 truncate">{t.title}</span>
       <span className="flex items-center gap-2 shrink-0">
-        {t.owner.slice(0, 2).map((o) => <span key={o} className="rounded-full" style={{ width: 9, height: 9, background: (TEAM[o] || TEAM.all).color }} />)}
+        {t.owner.slice(0, 2).map((o) => { const m = TEAM[o] || TEAM.all; return (
+          <span key={o} className="inline-flex items-center gap-1 rounded-full font-medium whitespace-nowrap" style={{ background: m.color + "1f", color: m.color, padding: "2px 9px", fontSize: 12 }}>
+            <span className="rounded-full" style={{ width: 5, height: 5, background: m.color }} />{m.name}
+          </span>); })}
         {t.due && <span className="inline-flex items-center gap-1 rounded-full text-[12px] font-semibold px-2.5 py-1 tabular-nums" style={{ background: STATE[st].chip, color: STATE[st].text }}>{fmt(t.due)}{!t.done && d >= 0 && d <= 7 && <span> · {d === 0 ? "today" : d + "d"}</span>}{!t.done && d < 0 && <span> · {Math.abs(d)}d late</span>}</span>}
       </span>
     </button>
@@ -682,11 +743,12 @@ export default function Dashboard() {
           <span className="text-[16px] font-bold text-slate-800 flex-1">{m.name}</span>
           {saved && <span className="text-[12px] text-emerald-600 font-medium">Saved ✓</span>}
         </div>
-        <textarea ref={ref} defaultValue={board.notes[id] || ""} onInput={() => setSaved(false)} rows={9}
+        <textarea ref={ref} defaultValue={noteDraftRef.current[id] ?? (board.notes[id] || "")}
+          onInput={(e) => { setSaved(false); typingRef.current = Date.now(); noteDraftRef.current[id] = e.target.value; }} rows={9}
           placeholder="Write anything — blockers, ideas, links, reminders…"
           className="w-full px-5 py-4 text-[15px] text-slate-700 resize-y focus:outline-none leading-relaxed" />
         <div className="px-5 py-3 border-t border-slate-100 flex justify-end">
-          <button onClick={() => { saveNote(id, ref.current.value); setSaved(true); }} className="text-[13px] px-4 py-2 rounded-lg bg-indigo-600 text-white font-medium hover:bg-indigo-700">Save</button>
+          <button onClick={() => { saveNote(id, ref.current.value); delete noteDraftRef.current[id]; setSaved(true); }} className="text-[13px] px-4 py-2 rounded-lg bg-indigo-600 text-white font-medium hover:bg-indigo-700">Save</button>
         </div>
       </div>
     );
